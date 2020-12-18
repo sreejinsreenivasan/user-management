@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<body class="font-sans antialiased text-gray-900 ">
+    <div x-data="App()" class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="max-w-md w-full px-6">
+            <img class="mx-auto h-8 w-auto" src="https://tailwindui.com/img/tailwindui-logo.svg" alt="">
+
+
+            <h2 class="mt-10 text-3xl font-semibold text-center font-display">Reset your password</h2>
+            <p class="mt-5 text-sm text-center text-gray-600">
+                Enter your password for completing signup process.
+            </p>
+
+            <form @submit="submit"
+                class="mt-5" action="" method="POST">
+                <div class="rounded-md shadow-sm">
+                    <input
+                        x-model="password"
+                    aria-label="Password" name="password" type="password" required="" autofocus=""
+                        class="border-gray-300 placeholder-gray-500 focus:shadow-outline-blue focus:border-blue-300  appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none sm:text-sm"
+                        placeholder="Password" value="">
+                </div>
+
+                <div class="my-3">
+                    <div class="rounded-md shadow-sm relative flex">
+                        <input 
+                            x-bind:type="show ? 'text' : 'password'"
+                            x-model="password_confirm"
+                         aria-label="Confirm Password" name="password_confirm" id="password2" required="" autofocus=""
+                            class="relative border-gray-300 placeholder-gray-500 focus:shadow-outline-blue focus:border-blue-300  appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none sm:text-sm"
+                            placeholder="Confirm Password" value="">
+                        <img x-show="show" 
+                            x-on:click="toggle()" 
+                            id="eye-off" 
+                            class="z-10 h-full leading-snug font-normal absolute text-center text-gray-400 absolute bg-transparent rounded text-base items-center justify-center w-8 right-0 pr-3 py-3" src="{% static 'assets/eye-off.svg' %}" />
+                        <img x-show="!false" 
+                            x-on:click="toggle()"
+                            id="eye" 
+                            class="z-10 h-full leading-snug font-normal absolute text-center text-gray-400 absolute bg-transparent rounded text-base items-center justify-center w-8 right-0 pr-3 py-3"
+                            src="{% static 'assets/eye.svg' %}" />
+                    </div>
+                </div>
+                        <div class="flex justify-start mt-3 ml-4 p-1">
+                            <ul>
+                                <li class="flex items-center py-1">
+                                    <div :class="{'bg-green-200 text-green-700': password == password_confirm && password.length > 0, 'bg-red-200 text-red-700':password != password_confirm || password.length == 0}"
+                                        class=" rounded-full p-1 fill-current ">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path x-show="password == password_confirm && password.length > 0" stroke-linecap="round"
+                                                stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            <path x-show="password != password_confirm || password.length == 0" stroke-linecap="round"
+                                                stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        
+                                        </svg>
+                                    </div>
+                                    <span
+                                        :class="{'text-green-700': password == password_confirm && password.length > 0, 'text-red-700':password != password_confirm || password.length == 0}"
+                                        class="font-medium text-sm ml-3"
+                                        x-text="password == password_confirm && password.length > 0 ? 'Passwords match' : 'Passwords do not match' "></span>
+                                </li>
+                                <li class="flex items-center py-1">
+                                    <div :class="{'bg-green-200 text-green-700': password.length > 7, 'bg-red-200 text-red-700':password.length < 7 }"
+                                        class=" rounded-full p-1 fill-current ">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path x-show="password.length > 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                            <path x-show="password.length < 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                        
+                                        </svg>
+                                    </div>
+                                    <span :class="{'text-green-700': password.length > 7, 'text-red-700':password.length < 7 }"
+                                        class="font-medium text-sm ml-3"
+                                        x-text="password.length > 7 ? 'The minimum length is reached' : 'At least 8 characters required' "></span>
+                                </li>
+                            </ul>
+                        </div>
+                <div class="mt-5">
+                    <button type="submit"
+                        x-text="isLoading ? 'Loading' : 'Complete'"
+                        x-bind:disabled="password.length < 8 || password != password_confirm"
+                        :class="password.length < 8 || password != password_confirm ? 'relative block w-full py-2 px-3 border border-transparent rounded-md text-white font-semibold bg-gray-600 cursor-not-allowed'
+                        : 'relative block w-full py-2 px-3 border border-transparent rounded-md text-white font-semibold bg-gray-800 hover:bg-gray-700 focus:bg-gray-900 focus:outline-none focus:shadow-outline sm:text-sm'"
+                        />
+                        
+                </div>
+            </form>
+        </div>
+    </div>
+<script>
+    function App(){
+        return {
+            show:false,
+            isLoading:false,
+            password:"",
+            password_confirm:"",
+            toggle:function(){
+                this.show = !this.show;
+            },
+            submit:function(event){
+                event.preventDefault();
+                const palyoad = new FormData(event.target);
+                palyoad.append('csrfmiddlewaretoken','{{csrf_token}}')
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST','',true);
+                this.isLoading = true;
+                xhr.send(palyoad);
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                        const response = xhr.response;
+                        this.isLoading = false
+                        alert(response);
+                        window.location.reload()
+                    }
+                    else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 400){
+                        this.isLoading = false;
+                        alert(xhr.responseText)
+                    }
+                }
+
+            }
+        }
+    }
+ 
+</script>
+{% endblock %}
